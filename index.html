@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d18">
+<title>JARVIS | Home Intelligence</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d18;color:#eaf5ff;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:22px;display:flex;justify-content:space-between;border-bottom:1px solid #263b50}
+.logo{color:#dfbb76;letter-spacing:5px;font-size:22px}
+.status{color:#71d9ed;font-size:11px}
+main{max-width:650px;margin:auto;padding:24px 18px}
+h1{font-size:34px;font-weight:400}
+.muted{color:#8196ad}
+.reactor{width:150px;height:150px;margin:35px auto;border-radius:50%;border:2px solid #70d9ef;display:grid;place-items:center;box-shadow:0 0 35px #35c5ef55,inset 0 0 30px #35c5ef33;animation:pulse 3s infinite}
+.reactor span{font-size:65px;color:#b6efff}
+@keyframes pulse{50%{box-shadow:0 0 55px #35c5ef99,inset 0 0 40px #35c5ef66}}
+.center{text-align:center}
+.panel{background:#111e30;border:1px solid #294158;border-radius:17px;padding:18px;margin:15px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{background:#16364a;border:1px solid #47758a;color:#eaf5ff;border-radius:12px;padding:13px;cursor:pointer}
+button:active{background:#28617b}
+.device{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.device button{min-width:65px}
+input{width:100%;padding:14px;border-radius:10px;background:#091421;border:1px solid #36516a;color:white}
+.chat{height:180px;overflow:auto;font-size:14px;line-height:1.5}
+.gold{color:#dfbb76}
+footer{text-align:center;color:#657d96;font-size:10px;padding:25px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">J.A.R.V.I.S.</div>
+<div class="status">● SYSTEM ONLINE</div>
+</header>
+<main>
+<section class="center">
+<p class="muted">PERSONAL HOME INTELLIGENCE</p>
+<h1>At your service.</h1>
+<div class="reactor"><span>J</span></div>
+<p class="gold">JARVIS CORE</p>
+<p class="muted">Awaiting your command.</p>
+</section>
+
+<section class="panel">
+<h3>HOME OVERVIEW</h3>
+<div class="grid">
+<div><p class="muted">SERVER</p><b id="server">Disconnected</b></div>
+<div><p class="muted">DEVICES</p><b>6 planned</b></div>
+</div>
+</section>
+
+<section class="panel">
+<h3>DEVICE CONTROL</h3>
+<div id="devices"></div>
+<p class="muted">Demo controls only. Real devices require a connected server.</p>
+</section>
+
+<section class="panel">
+<h3>JARVIS ASSISTANT</h3>
+<div class="chat" id="chat">
+<p><span class="gold">JARVIS:</span> Good evening. How may I assist you?</p>
+</div>
+<input id="command" placeholder="Enter your command...">
+<div class="grid" style="margin-top:12px">
+<button onclick="send()">SEND COMMAND</button>
+<button onclick="listen()">🎙 VOICE</button>
+</div>
+</section>
+</main>
+<footer>JARVIS HOME INTELLIGENCE • PHASE 1A</footer>
+
+<script>
+const names=["TCL Android TV","LG Refrigerator","iPhone","Air Conditioner","Lights","Fans"];
+const states={};
+const devices=document.getElementById("devices");
+
+names.forEach((name,i)=>{
+states[i]=false;
+const row=document.createElement("div");
+row.className="device";
+row.style.margin="15px 0";
+const label=document.createElement("span");
+label.textContent=name;
+const btn=document.createElement("button");
+btn.textContent="OFF";
+btn.onclick=()=>{
+states[i]=!states[i];
+btn.textContent=states[i]?"ON":"OFF";
+};
+row.append(label,btn);
+devices.append(row);
+});
+
+function say(text){
+const speech=new SpeechSynthesisUtterance(text);
+speech.lang="en-IN";
+speechSynthesis.speak(speech);
+}
+
+function send(){
+const field=document.getElementById("command");
+const value=field.value.trim();
+if(!value)return;
+add("YOU",value);
+let answer="Command received. The AI brain connection is not configured yet.";
+const q=value.toLowerCase();
+if(q.includes("hello"))answer="Hello. I am JARVIS. At your service.";
+if(q.includes("status"))answer="JARVIS interface is online. Home server is disconnected.";
+if(q.includes("time"))answer="The time is "+new Date().toLocaleTimeString();
+add("JARVIS",answer);
+say(answer);
+field.value="";
+}
+
+function add(who,text){
+const p=document.createElement("p");
+const b=document.createElement("b");
+b.className="gold";
+b.textContent=who+": ";
+p.append(b,document.createTextNode(text));
+const chat=document.getElementById("chat");
+chat.append(p);
+chat.scrollTop=chat.scrollHeight;
+}
+
+function listen(){
+const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!Speech){add("JARVIS","Voice recognition is not available in this browser. Please use text commands.");return;}
+const recognition=new Speech();
+recognition.lang="en-IN";
+recognition.onresult=e=>{
+document.getElementById("command").value=e.results[0][0].transcript;
+send();
+};
+recognition.onerror=()=>add("JARVIS","Microphone recognition could not start. Check microphone permission.");
+recognition.start();
+}
+</script>
+</body>
+</html>
